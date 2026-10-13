@@ -1,0 +1,235 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f5f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #263b80;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        input, button {
+            padding: 10px;
+            font-size: 15px;
+        }
+
+        input {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        button {
+            background: #263b80;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: #4059ad;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #263b80;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+        }
+
+        .delete-btn:hover {
+            background: #b02a37;
+        }
+
+        #message {
+            color: #198754;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 550px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Student Management System</h1>
+
+    <div class="container">
+
+        <h2>Add Student</h2>
+
+        <form id="studentForm">
+            <input type="number" id="roll"
+                   placeholder="Roll Number" min="1" required>
+
+            <input type="text" id="name"
+                   placeholder="Student Name" required>
+
+            <input type="text" id="course"
+                   placeholder="Course" required>
+
+            <input type="number" id="marks"
+                   placeholder="Marks (0-100)"
+                   min="0" max="100" required>
+
+            <button type="submit">Add Student</button>
+        </form>
+
+        <p id="message" aria-live="polite"></p>
+
+        <h2>Student Records</h2>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Roll No.</th>
+                    <th>Name</th>
+                    <th>Course</th>
+                    <th>Marks</th>
+                    <th>Grade</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody id="studentList"></tbody>
+        </table>
+
+    </div>
+
+    <script>
+        let students = [];
+
+        const form = document.getElementById("studentForm");
+        const studentList = document.getElementById("studentList");
+        const message = document.getElementById("message");
+
+        function getGrade(marks) {
+            if (marks >= 90) return "A";
+            if (marks >= 75) return "B";
+            if (marks >= 60) return "C";
+            if (marks >= 45) return "D";
+            return "F";
+        }
+
+        function displayStudents() {
+            studentList.innerHTML = "";
+
+            students.forEach(function(student, index) {
+                const row = document.createElement("tr");
+
+                [
+                    student.roll,
+                    student.name,
+                    student.course,
+                    student.marks,
+                    getGrade(student.marks)
+                ].forEach(function(value) {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    row.appendChild(cell);
+                });
+
+                const actionCell = document.createElement("td");
+                const deleteButton = document.createElement("button");
+
+                deleteButton.textContent = "Delete";
+                deleteButton.className = "delete-btn";
+
+                deleteButton.addEventListener("click", function() {
+                    students.splice(index, 1);
+                    displayStudents();
+                    message.textContent = "Student deleted successfully";
+                });
+
+                actionCell.appendChild(deleteButton);
+                row.appendChild(actionCell);
+                studentList.appendChild(row);
+            });
+        }
+
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            const roll = Number(document.getElementById("roll").value);
+            const name = document.getElementById("name").value.trim();
+            const course = document.getElementById("course").value.trim();
+            const marks = Number(document.getElementById("marks").value);
+
+            if (!Number.isInteger(roll) || roll < 1 ||
+                !name || !course || marks < 0 || marks > 100) {
+                message.textContent = "Please enter valid details";
+                return;
+            }
+
+            const exists = students.some(function(student) {
+                return student.roll === roll;
+            });
+
+            if (exists) {
+                message.textContent = "Roll number already exists";
+                return;
+            }
+
+            students.push({
+                roll: roll,
+                name: name,
+                course: course,
+                marks: marks
+            });
+
+            displayStudents();
+            form.reset();
+            message.textContent = "Student added successfully";
+        });
+    </script>
+
+</body>
+</html>
